@@ -1,3 +1,4 @@
+import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -10,6 +11,10 @@ export default defineConfig({
 		tailwindcss(),
 		biomePlugin({
 			biomeCommandBase: "bunx @biomejs/biome",
+			files: "src/",
+		}),
+		ValidateEnv({
+			configFile: "env",
 		}),
 	],
 });

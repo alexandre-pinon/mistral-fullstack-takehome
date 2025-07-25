@@ -2,3 +2,8 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, bumblebee;
 }
+@plugin "daisyui/theme" {
+  name: "bumblebee";
+  --color-primary: #e98d60;
+  --color-secondary: #ffc107;
+}
