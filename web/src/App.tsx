@@ -1,29 +1,24 @@
-import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useCallback, useEffect, useState } from "react";
 import { Alert } from "./components/Alert";
 import { Chat } from "./components/Chat";
 import { ChatInput } from "./components/ChatInput";
 import { type ChatMessage, createChatMessage } from "./entities/ChatMessage";
-import { chat as sendMessageToAssistant } from "./services/api-client";
-
-const chatHistory: ChatMessage[] = [
-  {
-    id: uuidv4(),
-    role: "user",
-    content: "Coucou la tortue !",
-    createdAt: new Date(),
-  },
-  {
-    id: uuidv4(),
-    role: "assistant",
-    content: "COUCOU !",
-    createdAt: new Date(),
-  },
-];
+import { loadChat, chat as sendMessageToAssistant } from "./services/api-client";
 
 const App = () => {
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(chatHistory);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const handleError = useCallback((error: unknown) => {
+    setError(error instanceof Error ? error.message : "Something went wrong");
+    setTimeout(() => {
+      setError(null);
+    }, 5000);
+  }, []);
+
+  useEffect(() => {
+    loadChat().then(setChatMessages).catch(handleError);
+  }, [handleError]);
 
   const handleSend = async (message: string) => {
     const userMessage = createChatMessage("user", message);
@@ -31,18 +26,10 @@ const App = () => {
 
     try {
       const assistantMessage = await sendMessageToAssistant(userMessage);
-      console.log(assistantMessage);
       setChatMessages((prev) => [...prev, assistantMessage]);
-    } catch (error: unknown) {
-      handleError(error instanceof Error ? error : new Error("Something went wrong"));
+    } catch (error) {
+      handleError(error);
     }
-  };
-
-  const handleError = (error: Error) => {
-    setError(error.message);
-    setTimeout(() => {
-      setError(null);
-    }, 5000);
   };
 
   return (

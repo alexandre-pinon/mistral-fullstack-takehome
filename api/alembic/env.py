@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.models import SQLModel
-from app.config import get_settings
+from app.config import settings
 
 target_metadata = SQLModel.metadata
 
@@ -30,7 +30,7 @@ target_metadata = SQLModel.metadata
 
 
 def get_url() -> str:
-    return str(get_settings().database_url)
+    return str(settings().database_url)
 
 
 def run_migrations_offline() -> None:
