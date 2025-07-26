@@ -21,7 +21,7 @@ const chatHistory: ChatMessage[] = [
   },
 ];
 
-const App: React.FC = () => {
+const App = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(chatHistory);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +30,8 @@ const App: React.FC = () => {
     setChatMessages((prev) => [...prev, userMessage]);
 
     try {
-      const assistantMessage = await sendMessageToAssistant(message);
+      const assistantMessage = await sendMessageToAssistant(userMessage);
+      console.log(assistantMessage);
       setChatMessages((prev) => [...prev, assistantMessage]);
     } catch (error: unknown) {
       handleError(error instanceof Error ? error : new Error("Something went wrong"));
