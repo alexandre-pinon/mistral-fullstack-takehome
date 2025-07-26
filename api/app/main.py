@@ -8,8 +8,11 @@ from mistralai.models import HTTPValidationError, SDKError
 from .config import settings
 from .deps import MistralClientDep, SessionDep
 from .models import ChatMessage, ChatRequest, HealthCheckResponse, Role
-from .mistral import map_completion_response_to_chat_message
-
+from .mistral import (
+    map_chat_messages_to_completion_request_messages,
+    map_completion_response_to_chat_message,
+)
+from .logger import logger
 
 app = FastAPI(
     title="Turtle chat API",
@@ -48,21 +51,25 @@ def chat(
     try:
         chat_completion_response = mistral_client.chat.complete(
             model=settings().mistral_model_name,
-            messages=messages,
+            messages=map_chat_messages_to_completion_request_messages(messages),
         )
+        logger.info(f"Chat completion response: {chat_completion_response}")
         assistant_message = map_completion_response_to_chat_message(
             chat_completion_response
         )
     except ValidationError as e:
+        logger.error(f"Validation error: {e}")
         raise HTTPException(
-            status_code=502, detail=f"Invalid response from AI service: {str(e)}"
+            status_code=502, detail=f"Invalid response from AI service: {e}"
         )
     except HTTPValidationError as e:
+        logger.error(f"HTTP validation error: {e}")
         raise HTTPException(
-            status_code=502, detail=f"Invalid request to AI service: {str(e)}"
+            status_code=502, detail=f"Invalid request to AI service: {e}"
         )
     except SDKError as e:
-        raise HTTPException(status_code=502, detail=f"AI service error: {str(e)}")
+        logger.error(f"AI service error: {e}")
+        raise HTTPException(status_code=502, detail=f"AI service error: {e}")
 
     session.add(assistant_message)
     session.commit()

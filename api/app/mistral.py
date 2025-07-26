@@ -1,10 +1,13 @@
 from datetime import datetime
 from mistralai import Mistral, models
-from mistralai.models import ChatCompletionResponse
+from mistralai.models import (
+    ChatCompletionResponse,
+    Messages as ChatCompletionRequestMessages,
+)
 from functools import lru_cache
 from pydantic import ValidationError
 
-from .models import ChatMessage
+from .models import ChatMessage, Role
 from .config import settings
 
 
@@ -13,6 +16,18 @@ def mistral_client() -> Mistral:
     return Mistral(
         api_key=settings().mistral_api_key,
     )
+
+
+def map_chat_messages_to_completion_request_messages(
+    messages: list[ChatMessage],
+) -> ChatCompletionRequestMessages:
+    return [
+        {
+            "role": message.role.value,
+            "content": message.content,
+        }
+        for message in messages
+    ]
 
 
 def map_completion_response_to_chat_message(
@@ -29,8 +44,10 @@ def map_completion_response_to_chat_message(
     assistant_message = response.choices[0].message
 
     return ChatMessage.model_validate(
-        id=response.id,
-        role=assistant_message.role,
-        content=assistant_message.content,
-        created_at=datetime.fromtimestamp(response.created),
+        {
+            "id": response.id,
+            "role": Role(assistant_message.role),
+            "content": assistant_message.content,
+            "created_at": datetime.fromtimestamp(response.created),
+        }
     )
