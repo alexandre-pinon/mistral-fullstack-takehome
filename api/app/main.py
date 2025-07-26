@@ -1,11 +1,13 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from enum import Enum
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime
 from uuid import uuid4
 
-app = FastAPI()
+from .llm import LlmClientDep
+from .config import get_settings
 
 
 class Role(str, Enum):
@@ -28,6 +30,19 @@ class HealthCheckResponse(BaseModel):
     status: str
 
 
+settings = get_settings()
+app = FastAPI(
+    title="Turtle chat API",
+    description="API for the Turtle chat app",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins,
+    allow_methods=["GET", "POST"],
+)
+
+
 @app.get("/health")
 def health_check() -> HealthCheckResponse:
     return HealthCheckResponse(status="ok")
@@ -46,7 +61,10 @@ def get_chat_history() -> List[ChatMessage]:
 
 
 @app.post("/chat")
-def chat(request: ChatRequest) -> ChatMessage:
+def chat(
+    request: ChatRequest,
+    llm_client: LlmClientDep,
+) -> ChatMessage:
     return ChatMessage(
         id=str(uuid4()),
         role=Role.ASSISTANT,
