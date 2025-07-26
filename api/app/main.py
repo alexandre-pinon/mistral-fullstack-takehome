@@ -1,14 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
-from datetime import datetime
-from uuid import uuid4
 from sqlmodel import select
+from pydantic import ValidationError
+from mistralai.models import HTTPValidationError, SDKError
 
-# from .llm import LlmClientDep
 from .config import settings
-from .deps import SessionDep
+from .deps import MistralClientDep, SessionDep
 from .models import ChatMessage, ChatRequest, HealthCheckResponse, Role
+from .mistral import map_completion_response_to_chat_message
 
 
 app = FastAPI(
@@ -35,7 +35,7 @@ def get_chat_history(session: SessionDep):
 
 @app.post("/chat", response_model=ChatMessage)
 def chat(
-    # llm_client: LlmClientDep,
+    mistral_client: MistralClientDep,
     session: SessionDep,
     request: ChatRequest,
 ):
@@ -43,10 +43,29 @@ def chat(
     session.add(user_message)
     session.commit()
 
-    # assistant_message = llm_client.generate_message(user_message)
-    # session.add(assistant_message)
-    # session.commit()
-    # session.refresh(assistant_message)
-    return ChatMessage.model_construct(
-        role=Role.ASSISTANT, content="Hello, how are you?"
-    )
+    messages = session.exec(select(ChatMessage)).all()
+
+    try:
+        chat_completion_response = mistral_client.chat.complete(
+            model=settings().mistral_model_name,
+            messages=messages,
+        )
+        assistant_message = map_completion_response_to_chat_message(
+            chat_completion_response
+        )
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=502, detail=f"Invalid response from AI service: {str(e)}"
+        )
+    except HTTPValidationError as e:
+        raise HTTPException(
+            status_code=502, detail=f"Invalid request to AI service: {str(e)}"
+        )
+    except SDKError as e:
+        raise HTTPException(status_code=502, detail=f"AI service error: {str(e)}")
+
+    session.add(assistant_message)
+    session.commit()
+    session.refresh(assistant_message)
+
+    return assistant_message
