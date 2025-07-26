@@ -1,33 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from enum import Enum
-from pydantic import BaseModel
 from typing import List
 from datetime import datetime
 from uuid import uuid4
 
+from .models import ChatMessage, ChatRequest, HealthCheckResponse, Role
 from .llm import LlmClientDep
 from .config import get_settings
-
-
-class Role(str, Enum):
-    USER = "user"
-    ASSISTANT = "assistant"
-
-
-class ChatMessage(BaseModel):
-    id: str
-    role: Role
-    content: str
-    created_at: datetime
-
-
-class ChatRequest(BaseModel):
-    message: ChatMessage
-
-
-class HealthCheckResponse(BaseModel):
-    status: str
 
 
 settings = get_settings()

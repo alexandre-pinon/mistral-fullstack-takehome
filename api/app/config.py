@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     mistral_api_key: str
     mistral_model_name: str
 
+    database_url: str
     allowed_origins: list[str]
 
 
