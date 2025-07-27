@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config.settings import settings
-from .routers.api_router import api_router
-from .routers.health_router import health_router
-from .errors.app_errors import TechnicalError
-from .errors.llm_api_errors import LLMAPIUnauthorizedAccessError, LLMAPIUnavailableError
-from .routers.handlers.api_exception_handler import (
+from .config import settings
+from .routers import api_router, health_router
+from .errors import (
+    TechnicalError,
+    LLMAPIUnauthorizedAccessError,
+    LLMAPIUnavailableError,
+)
+from .routers.handlers import (
     technical_error_handler,
     unauthorized_access_error_handler,
     unavailable_error_handler,

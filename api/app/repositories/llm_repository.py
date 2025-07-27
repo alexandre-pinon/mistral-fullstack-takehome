@@ -7,12 +7,10 @@ from mistralai.models import (
     HTTPValidationError,
     SDKError,
 )
-from ..models.sql_model import ChatMessage
-from ..models.domain_model import Role
-from ..config import settings
-from ..config.logger import logger
-from ..errors.app_errors import TechnicalError
-from ..errors.llm_api_errors import (
+from ..models import ChatMessage, Role
+from ..config import settings, logger
+from ..errors import (
+    TechnicalError,
     LLMAPIUnauthorizedAccessError,
     LLMAPIUnavailableError,
 )

@@ -1,11 +1,11 @@
 from fastapi import HTTPException, Request
 
-from ...errors.app_errors import TechnicalError
-from ...errors.llm_api_errors import (
+from ...errors import (
+    TechnicalError,
     LLMAPIUnauthorizedAccessError,
     LLMAPIUnavailableError,
 )
-from ...config.logger import logger
+from ...config import logger
 
 
 def technical_error_handler(request: Request, exc: TechnicalError):

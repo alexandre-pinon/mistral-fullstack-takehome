@@ -1,8 +1,7 @@
 from fastapi import APIRouter
 from typing import List
 
-from ..models.domain_model import ChatRequestPayload
-from ..models.sql_model import ChatMessage
+from ..models import ChatRequestPayload, ChatMessage
 from .deps import ChatMessageRepositoryDep, LLMRepositoryDep
 
 

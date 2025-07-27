@@ -2,9 +2,8 @@ from typing import Annotated
 from sqlmodel import Session
 from fastapi import Depends
 
-from ..config.db import get_session
-from ..repositories.chat_message_repository import ChatMessageRepository
-from ..repositories.llm_repository import LLMRepository
+from ..config import get_session
+from ..repositories import ChatMessageRepository, LLMRepository
 
 SessionDep = Annotated[Session, Depends(get_session)]
 LLMRepositoryDep = Annotated[LLMRepository, Depends()]

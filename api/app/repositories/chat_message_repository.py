@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
-from app.models.sql_model import ChatMessage
-from app.errors.app_errors import TechnicalError
+from ..models import ChatMessage
+from ..errors import TechnicalError
 
 
 class ChatMessageRepository:
