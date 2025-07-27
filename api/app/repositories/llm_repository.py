@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Generator
 from pydantic import ValidationError
 from mistralai import Mistral
 from mistralai.models import (
@@ -54,6 +55,55 @@ class LLMRepository:
             else:
                 raise LLMAPIUnavailableError(cause=e)
         except ValidationError as e:
+            raise LLMAPIUnavailableError(cause=e)
+
+    def chat_completion_stream(self, messages: list[ChatMessage]) -> Generator[str]:
+        """
+        Stream chat completion with Mistral AI.
+        Yields content chunks as they arrive.
+        """
+        try:
+            response = self.client.chat.stream(
+                model=settings().mistral_model_name,
+                messages=map_chat_messages_to_completion_request_messages(messages),
+            )
+
+            with response as stream:
+                for chunk in stream:
+                    logger.info(f"Received chunk: {chunk}")
+                    if (
+                        len(chunk.data.choices) > 0
+                        and chunk.data.choices[0].delta.content
+                    ):
+                        yield chunk.data.choices[0].delta.content
+
+                    if (
+                        len(chunk.data.choices) > 0
+                        and chunk.data.choices[0].finish_reason
+                    ):
+                        logger.info(
+                            f"Stream finished with reason: {chunk.data.choices[0].finish_reason}"
+                        )
+
+            logger.info(f"Stream finished")
+
+        except HTTPValidationError as e:
+            raise TechnicalError(
+                message="HTTP validation error during streaming",
+                cause=e,
+            )
+        except SDKError as e:
+            if e.status_code == 401:
+                raise LLMAPIUnauthorizedAccessError()
+            elif e.status_code == 400:
+                raise TechnicalError(
+                    message="HTTP validation error during streaming",
+                    cause=e,
+                )
+            else:
+                raise LLMAPIUnavailableError(cause=e)
+        except Exception as e:
+            logger.error(f"Unexpected error streaming chat completion: {e}")
             raise LLMAPIUnavailableError(cause=e)
 
 

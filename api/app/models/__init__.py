@@ -1,4 +1,11 @@
-from .domain_model import Role, ChatRequestPayload, HealthCheckResponse
+from .domain_model import (
+    Role,
+    ChatRequestPayload,
+    HealthCheckResponse,
+    UserMessageRequest,
+    StreamChunkResponse,
+    ChatMessagePublic,
+)
 from .sql_model import SQLModel, ChatMessage
 
 __all__ = [
@@ -7,4 +14,7 @@ __all__ = [
     "HealthCheckResponse",
     "SQLModel",
     "ChatMessage",
+    "UserMessageRequest",
+    "StreamChunkResponse",
+    "ChatMessagePublic",
 ]

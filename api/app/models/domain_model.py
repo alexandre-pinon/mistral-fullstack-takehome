@@ -9,11 +9,25 @@ class Role(Enum):
     ASSISTANT = "assistant"
 
 
-class ChatRequestPayload(BaseModel):
+class ChatMessagePublic(BaseModel):
     id: UUID
     role: Role
     content: str
     created_at: datetime
+
+
+class ChatRequestPayload(ChatMessagePublic): ...
+
+
+class UserMessageRequest(BaseModel):
+    content: str
+
+
+class StreamChunkResponse(BaseModel):
+    done: bool
+    content: str | None = None
+    error: str | None = None
+    assistant_message: ChatMessagePublic | None = None
 
 
 class HealthCheckResponse(BaseModel):
