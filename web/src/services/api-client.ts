@@ -72,25 +72,6 @@ export const chatStream = (
 	return eventSource;
 };
 
-// Legacy function for backward compatibility
-export const chat = async (message: ChatMessage): Promise<ChatMessage> => {
-	const response = await fetch(`${VITE_API_URL}/chat`, {
-		method: "POST",
-		body: JSON.stringify({ content: message.content }),
-		headers: {
-			"Content-Type": "application/json",
-		},
-	});
-
-	if (!response.ok) {
-		throw new Error("Failed to chat");
-	}
-
-	const responseData = (await response.json()) as ApiChatMessage;
-
-	return mapApiChatMessageToChatMessage(responseData);
-};
-
 type ApiChatMessage = {
 	id: string;
 	role: Role;
