@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { ChatMessage } from "../entities/ChatMessage";
-import { ChatMessageBubble } from "./ChatMessageBubble";
+import { ChatMessageBubbleMemo as ChatMessageBubble } from "./ChatMessageBubble";
 
 type ChatProps = {
   messages: ChatMessage[];

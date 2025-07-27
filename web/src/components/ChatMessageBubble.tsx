@@ -1,10 +1,11 @@
 import Markdown from "marked-react";
+import { memo } from "react";
 import assistantAvatar from "../assets/assistant_avatar.png";
 import type { ChatMessage } from "../entities/ChatMessage";
 
 type ChatMessageBubbleProps = Omit<ChatMessage, "id">;
 
-export const ChatMessageBubble = ({ role, content, createdAt }: ChatMessageBubbleProps) => {
+const ChatMessageBubble = ({ role, content, createdAt }: ChatMessageBubbleProps) => {
   return (
     <div className={`chat gap-y-1 ${role === "user" ? "chat-end" : "chat-start"}`}>
       {role === "assistant" && (
@@ -30,3 +31,5 @@ export const ChatMessageBubble = ({ role, content, createdAt }: ChatMessageBubbl
     </div>
   );
 };
+
+export const ChatMessageBubbleMemo = memo(ChatMessageBubble);
