@@ -1,4 +1,5 @@
 import json
+from typing import AsyncGenerator
 from fastapi import APIRouter, HTTPException
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from fastapi.responses import StreamingResponse
@@ -19,15 +20,15 @@ chat_router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @chat_router.get("", response_model=List[ChatMessagePublic])
-def get_chat_history(
+async def get_chat_history(
     chat_message_repository: ChatMessageRepositoryDep,
 ) -> List[ChatMessagePublic]:
     """Get all chat messages from the database."""
-    return chat_message_repository.get_all()
+    return await chat_message_repository.get_all()
 
 
 @chat_router.post("/messages", response_model=ChatMessagePublic)
-def send_user_message(
+async def send_user_message(
     chat_message_repository: ChatMessageRepositoryDep,
     body: UserMessageRequest,
 ) -> ChatMessagePublic:
@@ -40,11 +41,11 @@ def send_user_message(
         content=body.content,
     )
 
-    return chat_message_repository.create(user_message)
+    return await chat_message_repository.create(user_message)
 
 
 @chat_router.get("/messages/{message_id}/stream")
-def stream_assistant_response(
+async def stream_assistant_response(
     message_id: str,
     llm_repository: LLMRepositoryDep,
     chat_message_repository: ChatMessageRepositoryDep,
@@ -53,7 +54,7 @@ def stream_assistant_response(
     Stream the assistant's response for a specific user message.
     The user message must exist in the database.
     """
-    user_message = chat_message_repository.get_by_id(message_id)
+    user_message = await chat_message_repository.get_by_id(message_id)
     if not user_message:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
@@ -66,23 +67,23 @@ def stream_assistant_response(
             detail="Can only stream responses for user messages",
         )
 
-    messages = chat_message_repository.get_all()
+    messages = await chat_message_repository.get_all()
 
-    def generate_stream():
+    async def generate_stream() -> AsyncGenerator[str]:
         assistant_message = ChatMessage(
             role=Role.ASSISTANT,
             content="",
         )
 
         try:
-            for chunk in llm_repository.chat_completion_stream(messages):
+            async for chunk in llm_repository.chat_completion_stream(messages):
                 assistant_message.content += chunk
                 yield f"data: {json.dumps(StreamChunkResponse(
                     done=False,
                     content=chunk
                 ).model_dump())}\n\n"
 
-            chat_message_repository.create(assistant_message)
+            await chat_message_repository.create(assistant_message)
 
             yield f"data: {json.dumps(StreamChunkResponse(
                 done=True,

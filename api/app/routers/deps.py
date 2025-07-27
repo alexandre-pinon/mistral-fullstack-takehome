@@ -1,15 +1,15 @@
 from typing import Annotated
-from sqlmodel import Session
+from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import Depends
 
 from ..config import get_session
 from ..repositories import ChatMessageRepository, LLMRepository
 
-SessionDep = Annotated[Session, Depends(get_session)]
+AsyncSessionDep = Annotated[AsyncSession, Depends(get_session)]
 LLMRepositoryDep = Annotated[LLMRepository, Depends()]
 
 
-def get_chat_message_repository(session: SessionDep) -> ChatMessageRepository:
+def get_chat_message_repository(session: AsyncSessionDep) -> ChatMessageRepository:
     return ChatMessageRepository(session)
 
 
