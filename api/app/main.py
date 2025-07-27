@@ -1,18 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exception_handlers import http_exception_handler
 from typing import List
 from sqlmodel import select
-from pydantic import ValidationError
-from mistralai.models import HTTPValidationError, SDKError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import settings
-from .deps import MistralClientDep, SessionDep
+from .deps import ChatMessageRepositoryDep, LLMRepositoryDep, SessionDep
 from .models import ChatMessage, ChatRequest, HealthCheckResponse, Role
-from .mistral import (
-    map_chat_messages_to_completion_request_messages,
-    map_completion_response_to_chat_message,
-)
 from .logger import logger
+from .errors.llm_api_errors import LLMAPIUnauthorizedAccessError
+from .errors.llm_api_errors import LLMAPIUnavailableError
+from .errors.app_errors import TechnicalError
 
 app = FastAPI(
     title="Turtle chat API",
@@ -26,53 +25,47 @@ app.add_middleware(
 )
 
 
+@app.exception_handler(TechnicalError)
+async def technical_error_handler(request: Request, exc: TechnicalError):
+    logger.error(exc)
+    raise HTTPException(status_code=500, detail=exc.message)
+
+
+@app.exception_handler(LLMAPIUnauthorizedAccessError)
+async def unauthorized_access_error_handler(
+    request: Request, exc: LLMAPIUnauthorizedAccessError
+):
+    logger.error(exc)
+    raise HTTPException(status_code=401, detail=exc.message)
+
+
+@app.exception_handler(LLMAPIUnavailableError)
+async def unavailable_error_handler(request: Request, exc: LLMAPIUnavailableError):
+    logger.error(exc)
+    raise HTTPException(status_code=502, detail=exc.message)
+
+
 @app.get("/health", response_model=HealthCheckResponse)
 def health_check():
     return HealthCheckResponse(status="ok")
 
 
 @app.get("/chat", response_model=List[ChatMessage])
-def get_chat_history(session: SessionDep):
-    return session.exec(select(ChatMessage)).all()
+def get_chat_history(chat_message_repository: ChatMessageRepositoryDep):
+    return chat_message_repository.get_all()
 
 
 @app.post("/chat", response_model=ChatMessage)
 def chat(
-    mistral_client: MistralClientDep,
-    session: SessionDep,
+    llm_repository: LLMRepositoryDep,
+    chat_message_repository: ChatMessageRepositoryDep,
     request: ChatRequest,
 ):
     user_message = ChatMessage.model_validate(request)
-    session.add(user_message)
-    session.commit()
+    chat_message_repository.create(user_message)
 
-    messages = session.exec(select(ChatMessage)).all()
-
-    try:
-        chat_completion_response = mistral_client.chat.complete(
-            model=settings().mistral_model_name,
-            messages=map_chat_messages_to_completion_request_messages(messages),
-        )
-        logger.info(f"Chat completion response: {chat_completion_response}")
-        assistant_message = map_completion_response_to_chat_message(
-            chat_completion_response
-        )
-    except ValidationError as e:
-        logger.error(f"Validation error: {e}")
-        raise HTTPException(
-            status_code=502, detail=f"Invalid response from AI service: {e}"
-        )
-    except HTTPValidationError as e:
-        logger.error(f"HTTP validation error: {e}")
-        raise HTTPException(
-            status_code=502, detail=f"Invalid request to AI service: {e}"
-        )
-    except SDKError as e:
-        logger.error(f"AI service error: {e}")
-        raise HTTPException(status_code=502, detail=f"AI service error: {e}")
-
-    session.add(assistant_message)
-    session.commit()
-    session.refresh(assistant_message)
+    messages = chat_message_repository.get_all()
+    assistant_message = llm_repository.chat_completion(messages)
+    chat_message_repository.create(assistant_message)
 
     return assistant_message
