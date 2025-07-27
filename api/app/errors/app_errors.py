@@ -13,7 +13,7 @@ class AppError(Exception, ABC):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.code}: {self.message}\nCause: {self.cause}"
+        return f"{self.code}: {self.message}{f"\nCause: {self.cause}" if self.cause else ""}"
 
 
 class TechnicalError(AppError):

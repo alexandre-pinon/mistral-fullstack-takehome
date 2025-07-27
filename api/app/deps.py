@@ -1,6 +1,7 @@
 from typing import Annotated
 from sqlmodel import Session
 from fastapi import Depends
+
 from .db import get_session
 from .repositories.chat_message_repository import ChatMessageRepository
 from .repositories.llm_repository import LLMRepository
