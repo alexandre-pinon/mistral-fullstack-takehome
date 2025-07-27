@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from typing import List
 
-from ..models import ChatMessage, ChatRequest
-from ..deps import ChatMessageRepositoryDep, LLMRepositoryDep
+from ..models.domain_model import ChatRequestPayload
+from ..models.sql_model import ChatMessage
+from .deps import ChatMessageRepositoryDep, LLMRepositoryDep
 
 
 chat_router = APIRouter(prefix="/chat", tags=["chat"])
@@ -17,9 +18,9 @@ def get_chat_history(chat_message_repository: ChatMessageRepositoryDep):
 def chat(
     llm_repository: LLMRepositoryDep,
     chat_message_repository: ChatMessageRepositoryDep,
-    request: ChatRequest,
+    body: ChatRequestPayload,
 ) -> ChatMessage:
-    user_message = ChatMessage.model_validate(request)
+    user_message = ChatMessage.model_validate(body)
     chat_message_repository.create(user_message)
 
     messages = chat_message_repository.get_all()

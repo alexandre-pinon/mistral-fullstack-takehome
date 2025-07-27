@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import settings
+from .config.settings import settings
 from .routers.api_router import api_router
 from .routers.health_router import health_router
 from .errors.app_errors import TechnicalError

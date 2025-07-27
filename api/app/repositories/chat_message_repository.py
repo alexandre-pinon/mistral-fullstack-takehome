@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 
-from app.models import ChatMessage
+from app.models.sql_model import ChatMessage
 from app.errors.app_errors import TechnicalError
 
 

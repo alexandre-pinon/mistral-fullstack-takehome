@@ -5,7 +5,7 @@ from ...errors.llm_api_errors import (
     LLMAPIUnauthorizedAccessError,
     LLMAPIUnavailableError,
 )
-from ...logger import logger
+from ...config.logger import logger
 
 
 def technical_error_handler(request: Request, exc: TechnicalError):
