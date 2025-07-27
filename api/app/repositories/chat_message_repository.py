@@ -12,7 +12,9 @@ class ChatMessageRepository:
 
     async def get_all(self) -> list[ChatMessage]:
         try:
-            results = await self.session.exec(select(ChatMessage))
+            results = await self.session.exec(
+                select(ChatMessage).order_by(ChatMessage.created_at.asc())
+            )
             return results.all()
         except Exception as e:
             raise TechnicalError(message="Error getting chat messages", cause=e)

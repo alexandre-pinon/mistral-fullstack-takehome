@@ -36,8 +36,8 @@ export const sendUserMessage = async (
 
 export const chatStream = (
 	messageId: string,
-	onChunk: (content: string) => void,
-	onComplete: (message: ChatMessage) => void,
+	onChunk: (message: ChatMessage) => void,
+	onComplete: () => void,
 	onError: (error: Error) => void,
 ) => {
 	const eventSource = new EventSource(
@@ -49,12 +49,12 @@ export const chatStream = (
 			const data = JSON.parse(event.data) as StreamChunkResponse;
 
 			if (!data.done) {
-				onChunk(data.content);
-			} else if (data.assistant_message) {
-				onComplete(mapApiChatMessageToChatMessage(data.assistant_message));
-				eventSource.close();
+				onChunk(mapApiChatMessageToChatMessage(data.assistant_message));
 			} else if (data.error) {
 				onError(new Error(data.error));
+				eventSource.close();
+			} else {
+				onComplete();
 				eventSource.close();
 			}
 		} catch (error) {
@@ -82,11 +82,10 @@ type ApiChatMessage = {
 export type StreamChunkResponse =
 	| {
 			done: false;
-			content: string;
+			assistant_message: ApiChatMessage;
 	  }
 	| {
 			done: true;
-			assistant_message?: ApiChatMessage;
 			error?: string;
 	  };
 

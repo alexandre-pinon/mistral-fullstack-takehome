@@ -80,15 +80,12 @@ async def stream_assistant_response(
                 assistant_message.content += chunk
                 yield f"data: {json.dumps(StreamChunkResponse(
                     done=False,
-                    content=chunk
-                ).model_dump())}\n\n"
+                    assistant_message=assistant_message.model_dump()
+                ).model_dump(mode='json'))}\n\n"
 
             await chat_message_repository.create(assistant_message)
 
-            yield f"data: {json.dumps(StreamChunkResponse(
-                done=True,
-                assistant_message=ChatMessagePublic.model_validate(assistant_message.model_dump()),
-            ).model_dump(mode='json'))}\n\n"
+            yield f"data: {json.dumps(StreamChunkResponse(done=True).model_dump())}\n\n"
 
         except Exception as e:
             logger.error(f"Error in stream generation: {e}")

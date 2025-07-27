@@ -25,7 +25,6 @@ class UserMessageRequest(BaseModel):
 
 class StreamChunkResponse(BaseModel):
     done: bool
-    content: str | None = None
     error: str | None = None
     assistant_message: ChatMessagePublic | None = None
 

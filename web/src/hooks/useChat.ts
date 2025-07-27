@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { type ChatMessage, createChatMessage } from "../entities/ChatMessage";
+import type { ChatMessage } from "../entities/ChatMessage";
 import { chatStream, loadChat, sendUserMessage } from "../services/api-client";
 
 export const useChat = () => {
@@ -23,33 +23,20 @@ export const useChat = () => {
 			const userMessage = await sendUserMessage(message);
 			setChatMessages((prev) => [...prev, userMessage]);
 
-			const assistantMessage = createChatMessage("assistant", "");
-			setChatMessages((prev) => [...prev, assistantMessage]);
 			setIsStreaming(true);
-
 			chatStream(
 				userMessage.id,
-				(content) => {
+				(message) => {
 					setChatMessages((prev) => {
-						const newMessages = [...prev];
-						const lastMessageIndex = newMessages.length - 1;
-						const lastMessage = newMessages[lastMessageIndex];
-
-						if (lastMessage?.role === "assistant") {
-							newMessages[lastMessageIndex] = {
-								...lastMessage,
-								content: lastMessage.content + content,
-							};
+						const assistantMessage = prev.at(-1);
+						if (assistantMessage?.id === message.id) {
+							return [...prev.slice(0, -1), message];
 						}
-						return newMessages;
+
+						return [...prev, message];
 					});
 				},
-				(completedMessage) => {
-					setChatMessages((prev) => {
-						const newMessages = [...prev];
-						newMessages[newMessages.length - 1] = completedMessage;
-						return newMessages;
-					});
+				() => {
 					setIsStreaming(false);
 				},
 				(error) => {

@@ -12,12 +12,10 @@
   "dependencies": {
     "@biomejs/biome": "^2.1.2",
     "@tailwindcss/vite": "^4.1.11",
-    "@types/uuid": "^10.0.0",
     "marked-react": "^3.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11",
-    "uuid": "^11.1.0",
     "vite-plugin-biome": "^1.0.12"
   },
   "devDependencies": {
