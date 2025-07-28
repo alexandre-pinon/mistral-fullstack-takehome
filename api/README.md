@@ -2,6 +2,16 @@
 
 The `/tests` directory contains integration tests for the API.
 
+### Prerequisites
+
+- [uv](https://docs.astral.sh/uv/)
+
+As stated in the doc, you can **install uv** using this command :
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
 ### Setup
 
 Install test dependencies:
