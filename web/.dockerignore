@@ -1,39 +1,23 @@
-# Environment variables
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+.output/
+
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual environments
-.venv/
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
 # IDE
 .vscode/
@@ -51,57 +35,17 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
 # Logs
-*.log
 logs/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Database
-*.db
-*.sqlite3
-
-# Temporary files
-*.tmp
-*.temp
-
-# Node.js
-node_modules/
-dist/
-dist-ssr/
-*.local
-
-# Vite
-.vite/
-
-# Coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Alembic
-alembic.ini
+*.log
 
 # Runtime data
 pids/
@@ -115,6 +59,9 @@ coverage/
 
 # nyc test coverage
 .nyc_output
+
+# Dependency directories
+jspm_packages/
 
 # Optional npm cache directory
 .npm
@@ -143,6 +90,9 @@ coverage/
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
+
+# Vite
+.vite/
 
 # TypeScript cache
 *.tsbuildinfo
