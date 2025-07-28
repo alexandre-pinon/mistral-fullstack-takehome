@@ -1,5 +1,5 @@
 #!/bin/bash
 
-export DATABASE_URL="postgresql+asyncpg://test_user:test_password@localhost:5433/test_db"
-uv run pytest tests/
-unset DATABASE_URL
+./scripts/setup_integration_test.sh &&
+./scripts/run_integration_test_no_pre_post.sh &&
+./scripts/cleanup_integration_test.sh

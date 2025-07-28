@@ -12,41 +12,27 @@ uv add --dev pytest pytest-asyncio httpx
 
 ## Running Tests
 
-Run all tests:
+### Using the Test Scripts (Recommended)
 
-```bash
-pytest
-```
+The easiest way to run integration tests is using the provided scripts:
 
-Run only integration tests:
+1. **Setup the test database:**
 
-```bash
-pytest -m integration
-```
+   ```bash
+   ./scripts/setup_integration_test.sh
+   ```
 
-Run only health check tests:
+   This script:
 
-```bash
-pytest tests/test_health_integration.py
-```
+   - Starts the test database using Docker Compose
+   - Runs database migrations
+   - Sets up the test environment
 
-Run with verbose output:
-
-```bash
-pytest -v
-```
-
-## Test Structure
-
-- `conftest.py` - Pytest configuration and shared fixtures
-- `test_health_integration.py` - Integration tests for the health check endpoint
-
-## What the Health Check Tests Do
-
-The integration tests for the health check endpoint:
-
-1. Make actual HTTP requests to the `/health` endpoint
-2. Verify the response status code is 200 OK
-3. Verify the response JSON structure matches the expected format
-4. Check that the response contains the correct content-type header
-5. Validate that the response body has the expected `status: "ok"` field
+2. **Run the integration tests:**
+   ```bash
+   ./scripts/run_integration_test.sh
+   ```
+   This script:
+   - Sets the test database URL
+   - Runs all tests in the `tests/` directory
+   - Cleans up environment variables

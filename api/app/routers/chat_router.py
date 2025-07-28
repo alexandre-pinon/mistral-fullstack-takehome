@@ -27,7 +27,7 @@ async def get_chat_history(
     return await chat_message_repository.get_all()
 
 
-@chat_router.post("/messages", response_model=ChatMessagePublic)
+@chat_router.post("/messages", response_model=ChatMessagePublic, status_code=201)
 async def send_user_message(
     chat_message_repository: ChatMessageRepositoryDep,
     body: UserMessageRequest,
