@@ -21,7 +21,7 @@ A fullstack chat application built with FastAPI, React, and PostgreSQL, featurin
    **Option A: Copy the example file** (recommended):
 
    ```bash
-   cp env.example .env
+   cp .env.example .env
    ```
 
    Then edit `.env` and add your actual Mistral API key.
@@ -44,7 +44,7 @@ A fullstack chat application built with FastAPI, React, and PostgreSQL, featurin
 2. **Start all services**:
 
    ```bash
-   docker compose up --build -d
+   docker compose up -d
    ```
 
 3. **Access the application**:
